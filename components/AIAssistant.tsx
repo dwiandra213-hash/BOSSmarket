@@ -2,14 +2,9 @@
 
 import { useState } from "react"
 
-type Message = {
-  role: "assistant" | "user"
-  text: string
-}
-
 export default function AIAssistant() {
 
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState([
     {
       role: "assistant",
       text: "Halo 👋 Saya AI Assistant."
@@ -21,42 +16,47 @@ export default function AIAssistant() {
 
   async function sendMessage() {
 
-    if (!input || loading) return
+    if (!input.trim()) return
 
-    const userMessage: Message = {
-      role: "user",
-      text: input
-    }
-
-    const updatedMessages = [...messages, userMessage]
+    const updatedMessages = [
+      ...messages,
+      {
+        role: "user",
+        text: input
+      }
+    ]
 
     setMessages(updatedMessages)
-    setInput("")
     setLoading(true)
+
+    const userMessage = input
+    setInput("")
 
     try {
 
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: input
-        })
-      })
+      // AI fake response sementara
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      if (!res.ok) {
-        throw new Error("Server Error")
+      let reply = ""
+
+      if (userMessage.toLowerCase().includes("halo")) {
+        reply = "Halo juga 👋"
       }
-
-      const data = await res.json()
+      else if (userMessage.toLowerCase().includes("harga")) {
+        reply = "Silakan cek harga terbaru di dashboard."
+      }
+      else if (userMessage.toLowerCase().includes("produk")) {
+        reply = "Produk tersedia dan siap dijual."
+      }
+      else {
+        reply = "BOSS AI menerima pesan: " + userMessage
+      }
 
       setMessages([
         ...updatedMessages,
         {
           role: "assistant",
-          text: data.reply || "AI tidak memberi respon."
+          text: reply
         }
       ])
 
@@ -66,7 +66,7 @@ export default function AIAssistant() {
         ...updatedMessages,
         {
           role: "assistant",
-          text: "AI server offline."
+          text: "Server AI error."
         }
       ])
 
@@ -76,6 +76,7 @@ export default function AIAssistant() {
   }
 
   return (
+
     <div className="fixed bottom-5 right-5 w-96 bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl">
 
       <div className="bg-yellow-400 text-black p-4 font-bold text-lg">
