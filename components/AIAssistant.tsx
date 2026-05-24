@@ -2,47 +2,52 @@
 
 import { useState } from "react"
 
-export default function AIAssistant(){
+type Message = {
+  role: "assistant" | "user"
+  text: string
+}
 
-  const [messages,setMessages] = useState([
+export default function AIAssistant() {
+
+  const [messages, setMessages] = useState<Message[]>([
     {
-      role:"assistant",
-      text:"Halo 👋 Saya AI Assistant."
+      role: "assistant",
+      text: "Halo 👋 Saya AI Assistant."
     }
   ])
 
-  const [input,setInput] = useState("")
-  const [loading,setLoading] = useState(false)
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  async function sendMessage(){
+  async function sendMessage() {
 
-    if(!input || loading) return
+    if (!input || loading) return
 
-    const userMessage = {
-      role:"user",
-      text:input
+    const userMessage: Message = {
+      role: "user",
+      text: input
     }
 
-    const updatedMessages = [...messages,userMessage]
+    const updatedMessages = [...messages, userMessage]
 
     setMessages(updatedMessages)
     setInput("")
     setLoading(true)
 
-    try{
+    try {
 
-      const res = await fetch("/api/ai",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         },
-        body:JSON.stringify({
-          message:input
+        body: JSON.stringify({
+          message: input
         })
       })
 
-      if(!res.ok){
-        throw new Error("Server error")
+      if (!res.ok) {
+        throw new Error("Server Error")
       }
 
       const data = await res.json()
@@ -50,26 +55,27 @@ export default function AIAssistant(){
       setMessages([
         ...updatedMessages,
         {
-          role:"assistant",
-          text:data.reply || "AI tidak memberi respon."
+          role: "assistant",
+          text: data.reply || "AI tidak memberi respon."
         }
       ])
 
-    }catch(error){
+    } catch (error) {
 
       setMessages([
         ...updatedMessages,
         {
-          role:"assistant",
-          text:"AI server offline."
+          role: "assistant",
+          text: "AI server offline."
         }
       ])
+
     }
 
     setLoading(false)
   }
 
-  return(
+  return (
     <div className="fixed bottom-5 right-5 w-96 bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl">
 
       <div className="bg-yellow-400 text-black p-4 font-bold text-lg">
@@ -78,14 +84,14 @@ export default function AIAssistant(){
 
       <div className="h-80 overflow-y-auto p-4 space-y-3">
 
-        {messages.map((msg,index)=>(
+        {messages.map((msg, index) => (
 
           <div
             key={index}
             className={
-              msg.role==="assistant"
-              ? "bg-zinc-800 text-white p-3 rounded-xl"
-              : "bg-yellow-400 text-black p-3 rounded-xl text-right"
+              msg.role === "assistant"
+                ? "bg-zinc-800 text-white p-3 rounded-xl"
+                : "bg-yellow-400 text-black p-3 rounded-xl text-right"
             }
           >
             {msg.text}
@@ -106,10 +112,10 @@ export default function AIAssistant(){
         <input
           className="flex-1 p-4 bg-black text-white outline-none"
           value={input}
-          onChange={(e)=>setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Tulis pesan..."
-          onKeyDown={(e)=>{
-            if(e.key==="Enter"){
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
               sendMessage()
             }
           }}
